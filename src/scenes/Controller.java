@@ -2,22 +2,30 @@
  * Sample Skeleton for 'FinalProjectGUI.fxml' Controller Class
  */
 
+
 package scenes;
 
-import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
+import java.io.IOException;
+
 public class Controller {
+
+
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -82,12 +90,17 @@ public class Controller {
     @FXML // fx:id="countryC"
     private TableColumn<?, ?> countryC; // Value injected by FXMLLoader
 
-    public void mouseClicked(javafx.scene.input.MouseEvent mouseEvent) {
-        if(mouseEvent.getButton().equals(MouseButton.PRIMARY) && mouseEvent.getSource().equals(goButton)){
-            mainAPanel.setPrefSize(600,600);
-            loginPanel.setVisible(false);
-            subListPane.setVisible(true);
-        }
+
+    private Scene subListScene;
+
+    public void setSubListScene(Scene scene){
+        subListScene = scene;
+    }
+
+    //
+    public void buttonClicked(MouseEvent mouseEvent) {
+        Stage primaryStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
+        primaryStage.setScene(subListScene);
     }
 
 

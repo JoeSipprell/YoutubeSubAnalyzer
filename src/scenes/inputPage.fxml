@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane fx:id="inputGridPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scenes.Controller">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <AnchorPane fx:id="inputPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="275.0" prefWidth="550.0">
+         <children>
+            <Label fx:id="title" layoutX="130.0" layoutY="30.0" text="YouTube Subscriptions Analyzer" textAlignment="CENTER" textOverrun="CENTER_ELLIPSIS">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+            <Label fx:id="warningLabel" alignment="TOP_CENTER" layoutX="73.0" layoutY="78.0" text="Please ensure that you have made your subscriptions public" textAlignment="CENTER" />
+            <TextField fx:id="channelInputBox" layoutX="123.0" layoutY="140.0" prefHeight="31.0" prefWidth="297.0" promptText="Copy/Paste your channel URL here" />
+            <Button fx:id="startButton" defaultButton="true" layoutX="252.0" layoutY="196.0" mnemonicParsing="false" onMouseClicked="#buttonClicked" text="Go" />
+         </children>
+      </AnchorPane>
+   </children>
+</GridPane>
