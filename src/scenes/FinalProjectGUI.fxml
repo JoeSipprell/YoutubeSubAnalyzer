@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="mainAPanel" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="230.0" prefWidth="475.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scenes.Controller">
+   <children>
+      <Pane fx:id="loginPanel" layoutX="14.0" layoutY="14.0" prefHeight="212.0" prefWidth="444.0">
+         <children>
+            <Label fx:id="loginTitle" alignment="CENTER" contentDisplay="CENTER" layoutX="81.0" layoutY="23.0" text="YouTube Subscriptions Analyzer" textAlignment="CENTER">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+            <Button fx:id="goButton" layoutX="203.0" layoutY="159.0" mnemonicParsing="false" onMouseClicked="#mouseClicked" text="Go" />
+            <Label fx:id="warningLabel" layoutX="25.0" layoutY="61.0" text="Please ensure that you have made your subscriptions public" textAlignment="CENTER" />
+            <TextField fx:id="urlEntry" layoutX="74.0" layoutY="106.0" prefHeight="31.0" prefWidth="297.0" promptText="Copy/Paste your channel URL here" />
+         </children>
+      </Pane>
+      <Pane fx:id="subListPane" layoutX="8.0" layoutY="234.0" prefHeight="406.0" prefWidth="1051.0" visible="false">
+         <children>
+            <Label fx:id="tableTitle" layoutX="408.0" layoutY="23.0" text="YouTube Subscriptions List">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+          <AnchorPane fx:id="tablePanel" layoutX="9.0" layoutY="70.0" minHeight="0.0" minWidth="0.0" prefHeight="328.0" prefWidth="1034.0">
+               <children>
+                  <TableView fx:id="channelTable" layoutY="1.0" prefHeight="285.0" prefWidth="1034.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <columns>
+                      <TableColumn fx:id="nameC" prefWidth="75.0" text="Name" />
+                      <TableColumn fx:id="subC" prefWidth="111.25" text="Total Subscribers" />
+                        <TableColumn fx:id="viewsC" prefWidth="88.0" text="Total Views" />
+                        <TableColumn fx:id="dateC" prefWidth="106.0" text="Date Created" />
+                        <TableColumn fx:id="earningsC" prefWidth="240.0" text="Estimated Monthly Earnings">
+                           <columns>
+                              <TableColumn fx:id="minC" prefWidth="75.0" text="Min" />
+                              <TableColumn fx:id="maxC" prefWidth="75.0" text="Max" />
+                           </columns>
+                        </TableColumn>
+                        <TableColumn fx:id="countryC" minWidth="0.0" prefWidth="103.0" text="Country" />
+                        <TableColumn fx:id="genreC" prefWidth="119.0" text="Genre" />
+                    </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+                  </TableView>
+               </children>
+            </AnchorPane>
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
