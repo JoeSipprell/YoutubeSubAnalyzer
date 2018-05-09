@@ -27,19 +27,15 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import java.io.IOException;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 //import java.awt.datatransfer.*;
 //import java.awt.Toolkit;
 
-
+/**
+ * @author Ken Sipprell
+ * Controller class for the login page
+ * Maybe should be renamed
+ */
 public class Controller {
-
-
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -67,11 +63,19 @@ public class Controller {
 
     private Scene subListScene;
 
+    /**
+     *
+     * @param scene JavaFX scene for the list of channels scraped
+     */
     public void setSubListScene(Scene scene){
         subListScene = scene;
     }// end setSubListScene
 
-    //user clicks the 'go' button on the login page
+    /**
+     *
+     * @param mouseEvent when the go button is clicked
+     * a lot of this code should be moved to its own class or method
+     */
     public void buttonClicked(MouseEvent mouseEvent) {
         String URL = channelInputBox.getText();
 
@@ -85,7 +89,6 @@ public class Controller {
 
             try {
                 Document userChannel = Jsoup.connect(URL).userAgent("Chrome/66.0.3359.139").get();
-                //.userAgent("Chrome/66.0.3359.139")
 
                 Elements subURLs = userChannel.select("a[href]:not([title])");
                 Elements y = userChannel.select("a");
