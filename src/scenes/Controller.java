@@ -7,6 +7,7 @@ package scenes;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -25,6 +26,7 @@ import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import java.io.IOException;
 
 //import java.awt.datatransfer.*;
@@ -61,88 +63,100 @@ public class Controller {
     @FXML // fx:id="inputPane"
     private AnchorPane inputPane; // Value injected by FXMLLoader
 
+    public String userID;
+
     private Scene subListScene;
 
     /**
-     *
      * @param scene JavaFX scene for the list of channels scraped
      */
-    public void setSubListScene(Scene scene){
+    public void setSubListScene(Scene scene) {
         subListScene = scene;
     }// end setSubListScene
 
     /**
-     *
      * @param mouseEvent when the go button is clicked
-     * a lot of this code should be moved to its own class or method
      */
     public void buttonClicked(MouseEvent mouseEvent) {
-        String URL = channelInputBox.getText();
+        //String URL = channelInputBox.getText();
+        String URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
 
-        if(URL.contains("y")){
-            //URL = URL.substring(0 , URL.lastIndexOf('/') + 1 ) + "channels?view=56&shelf_id=0";
+        //URL = URL.substring(0 , URL.lastIndexOf('/') + 1 ) + "channels?view=56&shelf_id=0";
 
-            URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
+        if (URL.split("(/channel[/(s?)])").length == 3) {
+            checkChannelInput(URL);
+        } else {
+            warningLabel.setText("Sorry, your input was not valid, please try again.");
+        }
 
-            String userID = URL.split("(\\/channel[\\/(s\\?)])")[1];
+    }// end buttonClicked
+
+    /**
+     *
+     * @param URL the url of the user's youtube channel, which has been checked already
+     */
+    private void checkChannelInput(String URL){
+        try {
+            userID = URL.split("(/channel[/(s?)])")[1];
+
+            Document userChannel = Jsoup.connect(URL).userAgent("Chrome/66.0.3359.139").get();
+
+            Elements subURLs = userChannel.select("a[href]:not([title])");
+
+            System.out.println("boi");
+
+            System.out.println(subURLs.size());
 
 
-            try {
-                Document userChannel = Jsoup.connect(URL).userAgent("Chrome/66.0.3359.139").get();
-
-                Elements subURLs = userChannel.select("a[href]:not([title])");
-                Elements y = userChannel.select("a");
-
-                System.out.println("boi");
-
-                String x = "";
-
-                System.out.println(subURLs.size());
-                System.out.println(y.size());
-
-
-                for(Element subURL : subURLs){
-                    x = subURL.attr("href");
-
-                    /** checking href text
-                     * only lets through if link is directed to a channel
-                     * blocks if the URL found contains the user's channel ID
-                     */
-                    if(x.contains("/channel/") && !x.contains(userID)) {
-
-                        System.out.println(x);
-
-                        Document channelData = Jsoup.connect("https://socialblade.com/youtube" + x).userAgent("Chrome/66.0.3359.139").get();
-
-                        Element subName;
-                        try {
-                            subName = channelData.select("#YouTubeUserTopInfoBlockTop > div:nth-child(1) > h1").first();
-
-                            System.out.println(subName.text());
-                        } catch(NullPointerException i)
-                        {
-                            System.out.println("Sorry, this channel is not tracked by socialblade");
-                        }// end try catch block
-
-                    }// end checking href text
-                }
-
-                System.out.println("enboi");
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (Element subURL : subURLs) {
+                addChannel(subURL.attr("href"));
             }
 
-            //warningLabel.setText(URL);
+            System.out.println("enboi");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //warningLabel.setText(URL);
 
             /*StringSelection stringSelection = new StringSelection(URL);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);*/
-        }
+
 
 
         /*Stage primaryStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
         primaryStage.setScene(subListScene);*/
+    }// end checkChannelInput
+
+    public void addChannel(String channelID){
+        /** checking href text
+         * only lets through if link is directed to a channel
+         * blocks if the URL found contains the user's channel ID
+         */
+        if (channelID.contains("/channel/") && !channelID.contains(userID)) {
+
+            System.out.println(channelID);
+
+            Document channelData = null;
+            try {
+                channelData = Jsoup.connect("https://socialblade.com/youtube" + channelID).userAgent("Chrome/66.0.3359.139").get();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            Element subName;
+            try {
+                subName = channelData.select("#YouTubeUserTopInfoBlockTop > div:nth-child(1) > h1").first();
+
+                System.out.println(subName.text());
+            } catch (NullPointerException i) {
+                System.out.println("\nSorry, this channel is not tracked by socialblade\n");
+            }// end try catch block
+
+        }// end checking href text
     }
 
 
