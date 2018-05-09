@@ -14,14 +14,28 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.GridPane;
 
+import org.jsoup.Jsoup;
+import org.jsoup.helper.Validate;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import java.io.IOException;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+//import java.awt.datatransfer.*;
+//import java.awt.Toolkit;
+
 
 public class Controller {
 
@@ -33,81 +47,106 @@ public class Controller {
     @FXML // URL location of the FXML file that was given to the FXMLLoader
     private URL location;
 
-    @FXML // fx:id="mainAPanel"
-    private AnchorPane mainAPanel; // Value injected by FXMLLoader
+    @FXML // fx:id="channelInputBox"
+    private TextField channelInputBox; // Value injected by FXMLLoader
 
-    @FXML // fx:id="loginPanel"
-    private Pane loginPanel; // Value injected by FXMLLoader
-
-    @FXML // fx:id="minC"
-    private TableColumn<?, ?> minC; // Value injected by FXMLLoader
-
-    @FXML // fx:id="nameC"
-    private TableColumn<?, ?> nameC; // Value injected by FXMLLoader
-
-    @FXML // fx:id="viewsC"
-    private TableColumn<?, ?> viewsC; // Value injected by FXMLLoader
-
-    @FXML // fx:id="genreC"
-    private TableColumn<?, ?> genreC; // Value injected by FXMLLoader
-
-    @FXML // fx:id="goButton"
-    private Button goButton; // Value injected by FXMLLoader
-
-    @FXML // fx:id="subListPane"
-    private Pane subListPane; // Value injected by FXMLLoader
-
-    @FXML // fx:id="maxC"
-    private TableColumn<?, ?> maxC; // Value injected by FXMLLoader
-
-    @FXML // fx:id="channelTable"
-    private TableView<?> channelTable; // Value injected by FXMLLoader
-
-    @FXML // fx:id="tablePanel"
-    private AnchorPane tablePanel; // Value injected by FXMLLoader
-
-    @FXML // fx:id="earningsC"
-    private TableColumn<?, ?> earningsC; // Value injected by FXMLLoader
-
-    @FXML // fx:id="subC"
-    private TableColumn<?, ?> subC; // Value injected by FXMLLoader
+    @FXML // fx:id="startButton"
+    private Button startButton; // Value injected by FXMLLoader
 
     @FXML // fx:id="warningLabel"
     private Label warningLabel; // Value injected by FXMLLoader
 
-    @FXML // fx:id="urlEntry"
-    private TextField urlEntry; // Value injected by FXMLLoader
+    @FXML // fx:id="inputGridPane"
+    private GridPane inputGridPane; // Value injected by FXMLLoader
 
-    @FXML // fx:id="loginTitle"
-    private Label loginTitle; // Value injected by FXMLLoader
+    @FXML // fx:id="title"
+    private Label title; // Value injected by FXMLLoader
 
-    @FXML // fx:id="dateC"
-    private TableColumn<?, ?> dateC; // Value injected by FXMLLoader
-
-    @FXML // fx:id="tableTitle"
-    private Label tableTitle; // Value injected by FXMLLoader
-
-    @FXML // fx:id="countryC"
-    private TableColumn<?, ?> countryC; // Value injected by FXMLLoader
-
+    @FXML // fx:id="inputPane"
+    private AnchorPane inputPane; // Value injected by FXMLLoader
 
     private Scene subListScene;
 
     public void setSubListScene(Scene scene){
         subListScene = scene;
-    }
+    }// end setSubListScene
 
-    //
+    //user clicks the 'go' button on the login page
     public void buttonClicked(MouseEvent mouseEvent) {
-        Stage primaryStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
-        primaryStage.setScene(subListScene);
+        String URL = channelInputBox.getText();
+
+        if(URL.contains("y")){
+            //URL = URL.substring(0 , URL.lastIndexOf('/') + 1 ) + "channels?view=56&shelf_id=0";
+
+            URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
+
+            String userID = URL.split("(\\/channel[\\/(s\\?)])")[1];
+
+
+            try {
+                Document userChannel = Jsoup.connect(URL).userAgent("Chrome/66.0.3359.139").get();
+                //.userAgent("Chrome/66.0.3359.139")
+
+                Elements subURLs = userChannel.select("a[href]:not([title])");
+                Elements y = userChannel.select("a");
+
+                System.out.println("boi");
+
+                String x = "";
+
+                System.out.println(subURLs.size());
+                System.out.println(y.size());
+
+
+                for(Element subURL : subURLs){
+                    x = subURL.attr("href");
+
+                    /** checking href text
+                     * only lets through if link is directed to a channel
+                     * blocks if the URL found contains the user's channel ID
+                     */
+                    if(x.contains("/channel/") && !x.contains(userID)) {
+
+                        System.out.println(x);
+
+                        Document channelData = Jsoup.connect("https://socialblade.com/youtube" + x).userAgent("Chrome/66.0.3359.139").get();
+
+                        Element subName;
+                        try {
+                            subName = channelData.select("#YouTubeUserTopInfoBlockTop > div:nth-child(1) > h1").first();
+
+                            System.out.println(subName.text());
+                        } catch(NullPointerException i)
+                        {
+                            System.out.println("Sorry, this channel is not tracked by socialblade");
+                        }// end try catch block
+
+                    }// end checking href text
+                }
+
+                System.out.println("enboi");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //warningLabel.setText(URL);
+
+            /*StringSelection stringSelection = new StringSelection(URL);
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, null);*/
+        }
+
+
+        /*Stage primaryStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
+        primaryStage.setScene(subListScene);*/
     }
 
 
     /*@FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
         assert channelInputBox != null : "fx:id=\"channelInputBox\" was not injected: check your FXML file 'inputPage.fxml'.";
-        assert startButton != null : "fx:id=\"startButton\" was not injected: check your FXML file 'inputPage.fxml'.";
+        assert goButton != null : "fx:id=\"startButton\" was not injected: check your FXML file 'inputPage.fxml'.";
         assert warningLabel != null : "fx:id=\"warningLabel\" was not injected: check your FXML file 'inputPage.fxml'.";
         assert inputGridPane != null : "fx:id=\"inputGridPane\" was not injected: check your FXML file 'inputPage.fxml'.";
         assert title != null : "fx:id=\"title\" was not injected: check your FXML file 'inputPage.fxml'.";
