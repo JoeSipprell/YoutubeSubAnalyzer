@@ -137,7 +137,7 @@ public class Controller {
          */
         if (channelID.contains("/channel/") && !channelID.contains(userID)) {
 
-            System.out.println(channelID);
+            //System.out.println(channelID);
 
             Document channelData = null;
             try {
@@ -148,10 +148,13 @@ public class Controller {
 
 
             Element subName;
+            trackedSub r;
             try {
                 subName = channelData.select("#YouTubeUserTopInfoBlockTop > div:nth-child(1) > h1").first();
 
-                System.out.println(subName.text());
+                //System.out.println(subName.text());
+
+                r = new trackedSub(channelID, subName.text(), channelData);
             } catch (NullPointerException i) {
                 System.out.println("\nSorry, this channel is not tracked by socialblade\n");
             }// end try catch block
