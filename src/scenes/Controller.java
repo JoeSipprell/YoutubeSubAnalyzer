@@ -6,6 +6,7 @@
 package scenes;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import javafx.fxml.FXML;
@@ -29,6 +30,10 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
+import java.sql.*;
+
+
+
 //import java.awt.datatransfer.*;
 //import java.awt.Toolkit;
 
@@ -38,6 +43,9 @@ import java.io.IOException;
  * Maybe should be renamed
  */
 public class Controller {
+
+    ArrayList<trackedSub> tSubs = new ArrayList<>();
+    ArrayList<unTrackedSub> uSubs = new ArrayList<>();
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -79,12 +87,13 @@ public class Controller {
      */
     public void buttonClicked(MouseEvent mouseEvent) {
         //String URL = channelInputBox.getText();
-        String URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
+        //String URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
+        String URL = "https://www.youtube.com/channel/UCmDyVjHsavnb35lFW4Vms8w/channels?view=56&shelf_id=0";
 
         //URL = URL.substring(0 , URL.lastIndexOf('/') + 1 ) + "channels?view=56&shelf_id=0";
 
         if (URL.split("(/channel[/(s?)])").length == 3) {
-            checkChannelInput(URL);
+            checkChannelInput(URL, mouseEvent);
         } else {
             warningLabel.setText("Sorry, your input was not valid, please try again.");
         }
@@ -92,10 +101,10 @@ public class Controller {
     }// end buttonClicked
 
     /**
-     *
+     * scrapes annoying youtube page to find urls for subscribed channels
      * @param URL the url of the user's youtube channel, which has been checked already
      */
-    private void checkChannelInput(String URL){
+    private void checkChannelInput(String URL, MouseEvent mouseEvent){
         try {
             userID = URL.split("(/channel[/(s?)])")[1];
 
@@ -103,38 +112,25 @@ public class Controller {
 
             Elements subURLs = userChannel.select("a[href]:not([title])");
 
-            System.out.println("boi");
-
-            System.out.println(subURLs.size());
-
-
+            warningLabel.setText("Loading data from YouTube and SocialBlade...");
             for (Element subURL : subURLs) {
                 addChannel(subURL.attr("href"));
             }
-
-            System.out.println("enboi");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        //warningLabel.setText(URL);
+        warningLabel.setText("Creating tables in database...");
 
-            /*StringSelection stringSelection = new StringSelection(URL);
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            clipboard.setContents(stringSelection, null);*/
+        // create tables in database
+        saveToDataBase();
 
-
-
-        /*Stage primaryStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
-        primaryStage.setScene(subListScene);*/
+        Stage primaryStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
+        primaryStage.setScene(subListScene);
     }// end checkChannelInput
 
     public void addChannel(String channelID){
-        /** checking href text
-         * only lets through if link is directed to a channel
-         * blocks if the URL found contains the user's channel ID
-         */
         if (channelID.contains("/channel/") && !channelID.contains(userID)) {
 
             //System.out.println(channelID);
@@ -146,31 +142,131 @@ public class Controller {
                 e.printStackTrace();
             }
 
-
             Element subName;
-            trackedSub r;
             try {
                 subName = channelData.select("#YouTubeUserTopInfoBlockTop > div:nth-child(1) > h1").first();
 
-                //System.out.println(subName.text());
+                tSubs.add(new trackedSub(channelID, subName.text(), channelData));
 
-                r = new trackedSub(channelID, subName.text(), channelData);
             } catch (NullPointerException i) {
-                System.out.println("\nSorry, this channel is not tracked by socialblade\n");
+                System.out.println("\nSorry, this channel is not tracked by socialblade");
+
+                uSubs.add(new unTrackedSub(channelID));
             }// end try catch block
 
         }// end checking href text
     }
 
+    public void saveToDataBase(){
+        String DB_URL = "jdbc:mysql://db4free.net:3306/ytsubanalyzer?autoReconnect=true&useSSL=false";
+        String USER = "jsipprell";
+        String PASSWORD = "CMa9d*UVHrJr!2s7";
 
-    /*@FXML // This method is called by the FXMLLoader when initialization is complete
+        try
+        {
+            Connection conn = DriverManager.getConnection(DB_URL,USER,PASSWORD);
+
+            deleteTables(conn);
+
+            createTables(conn);
+
+            for (trackedSub ts: tSubs) {
+                addTrackedSub(conn, ts);
+            }
+
+            for (unTrackedSub us: uSubs) {
+                addUntrackedSub(conn, us);
+            }
+
+            conn.close();
+
+            System.out.println("done");
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * deletes the tables already in the database
+     * @param conn connection to db
+     * @throws SQLException
+     */
+    public static void deleteTables(Connection conn) throws SQLException
+    {
+        Statement dropTables = conn.createStatement();
+        String getGone = "DROP TABLE IF EXISTS Tracked_Subs";
+        dropTables.executeUpdate(getGone);
+        getGone = "DROP TABLE IF EXISTS UNTRACKED_SUBS";
+        dropTables.executeUpdate(getGone);
+    }// end deleteTables
+
+    /**
+     * creates a table of trackedSubs and a table of unTrackedSubs
+     * @param conn connection to db
+     * @throws SQLException
+     */
+    public static void createTables(Connection conn) throws SQLException
+    {
+        Statement addtTable = conn.createStatement();
+        String createT = "CREATE TABLE Tracked_Subs " +
+                " (Name VARCHAR(60), " +
+                " userID CHAR(24), " +
+                " Country CHAR(2), " +
+                " Genre VARCHAR(15), " +
+                " DateCreated Date, " +
+                " SubCount INT, " +
+                " ViewCount DECIMAL(19,0), " +
+                " MinInc DOUBLE, " +
+                " MaxInc DOUBLE, " +
+                " PRIMARY KEY ( userID ))";
+
+        Statement addUTable = conn.createStatement();
+        String createU = "CREATE TABLE UNTRACKED_SUBS (userID CHAR(24), PRIMARY KEY (userID))";
+
+        addtTable.executeUpdate(createT);
+        addUTable.executeUpdate(createU);
+    }// end createTable
+
+    /**
+     * fills out a row in the table of trackedSubs
+     * @param conn connection to db
+     * @param ts the trackedSub currently being added
+     * @throws SQLException
+     */
+    public static void addTrackedSub(Connection conn, trackedSub ts) throws SQLException
+    {
+        Statement addRow = conn.createStatement();
+
+        String row = "INSERT INTO Tracked_Subs VALUES " + ts.getTableRow();
+
+        addRow.executeUpdate(row);
+    } // end addTrackedSub
+
+    /**
+     * adds a row to table of untracked subs
+     * @param conn connection to db
+     * @param us untracked sub
+     * @throws SQLException
+     */
+    public static void addUntrackedSub(Connection conn, unTrackedSub us) throws SQLException
+    {
+        Statement addRow = conn.createStatement();
+
+        String row = "INSERT INTO UNTRACKED_SUBS VALUES " + us.getChannelID();
+
+        addRow.executeUpdate(row);
+    }//end addUntrackedSub
+
+
+    @FXML
     void initialize() {
         assert channelInputBox != null : "fx:id=\"channelInputBox\" was not injected: check your FXML file 'inputPage.fxml'.";
-        assert goButton != null : "fx:id=\"startButton\" was not injected: check your FXML file 'inputPage.fxml'.";
+        assert startButton != null : "fx:id=\"startButton\" was not injected: check your FXML file 'inputPage.fxml'.";
         assert warningLabel != null : "fx:id=\"warningLabel\" was not injected: check your FXML file 'inputPage.fxml'.";
         assert inputGridPane != null : "fx:id=\"inputGridPane\" was not injected: check your FXML file 'inputPage.fxml'.";
         assert title != null : "fx:id=\"title\" was not injected: check your FXML file 'inputPage.fxml'.";
         assert inputPane != null : "fx:id=\"inputPane\" was not injected: check your FXML file 'inputPage.fxml'.";
-
-    }*/
+    }
 }

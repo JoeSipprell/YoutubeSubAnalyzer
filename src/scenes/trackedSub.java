@@ -20,6 +20,7 @@ public class trackedSub {
     private final long viewCount;
     private final double minInc;
     private final double maxInc;
+    private final String tableRow;
 
     private final Document channelData;
 
@@ -46,11 +47,9 @@ public class trackedSub {
         String max = minMax.substring(minMax.lastIndexOf('$') + 1);
 
         minInc = calcMoney(min);
-        System.out.println(minInc);
         maxInc = calcMoney(max);
-        System.out.println(maxInc);
 
-        System.out.println(this.name);
+        tableRow = makeTableRow();
     } // end trackedSub constructor
 
     /**
@@ -79,8 +78,13 @@ public class trackedSub {
         return(date);
     }//end formatDate
 
+    /**
+     * converts string to double, and multiplies by the appropriate number based on a following character
+     * @param unF unformatted string
+     * @return number of dollars as a double
+     */
     private double calcMoney(String unF){
-        double dMoney = 0;
+        double dMoney;
 
         switch(unF.substring(unF.length() - 1)){
             case "K":
@@ -97,6 +101,61 @@ public class trackedSub {
         }
 
         return(dMoney);
+    }//end calcMoney
+
+    public String getChannelID() {
+        return channelID;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public Date getDateC() {
+        return dateC;
+    }
+
+    public Integer getSubCount() {
+        return subCount;
+    }
+
+    public long getViewCount() {
+        return viewCount;
+    }
+
+    public double getMinInc() {
+        return minInc;
+    }
+
+    public double getMaxInc() {
+        return maxInc;
+    }
+
+    public String getTableRow() { return tableRow; }
+
+    /**
+     * creates and returns a string formatted to be used in an sql statement to add a row to the table in the database
+     * @return table row string
+     */
+    private String makeTableRow()
+    {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+        return("('" + name + "', " +
+                "'" + channelID.substring(9) + "', " +
+                "'" + country + "', " +
+                "'" + genre + "', " +
+                "'" + df.format(dateC) + "', " +
+                subCount + ", " +
+                viewCount + ", " +
+                minInc + ", " + maxInc + ")");
+    }
 }
