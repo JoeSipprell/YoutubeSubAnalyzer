@@ -4,6 +4,7 @@
 
 package scenes;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,15 +14,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import javax.swing.*;
 
 /**
  * controller for sublist javafx scene
@@ -73,11 +76,26 @@ public class SubListController {
         @FXML // fx:id="countryColumn"
         private TableColumn<TrackedSub, String> countryColumn; // Value injected by FXMLLoader
 
+        @FXML
+        private TableColumn<TrackedSub, String> idColumn;
+
     @FXML // fx:id="subListTitle"
     private Label subListTitle; // Value injected by FXMLLoader
 
     @FXML // fx:id="goBackButton"
     private Button goBackButton; // Value injected by FXMLLoader
+
+    @FXML
+    private Label overall_stats_label;
+
+    @FXML
+    private ListView<?> channel_stat_list;
+
+    @FXML
+    private Button add_channel_button;
+
+    @FXML
+    private Button remove_channel_button;
 
 
     /**
@@ -117,6 +135,8 @@ public class SubListController {
             while(result.next()){
                 uSubs.add(result.getString("userID"));
             }
+
+            conn.close();
         }
         catch(SQLException e){
             e.printStackTrace();
@@ -130,10 +150,8 @@ public class SubListController {
         maxColumn.setCellValueFactory(cellData -> cellData.getValue().getMaxInc());
         genreColumn.setCellValueFactory(cellData -> cellData.getValue().getGenre());
         countryColumn.setCellValueFactory(cellData -> cellData.getValue().getCountry());
+        idColumn.setCellValueFactory(cellData -> cellData.getValue().getChannelID());
 
-        /*for (TrackedSub ts : trSubs) {
-            tSubs.add(ts);
-        }*/
 
         channelTable.setItems(tSubs);
         naList.setItems(uSubs);
@@ -174,5 +192,56 @@ public class SubListController {
         assert maxColumn != null : "fx:id=\"maxColumn\" was not injected: check your FXML file 'subList.fxml'.";
 
 
+    }
+
+    public void removeChannelDialogue(MouseEvent mouseEvent) {
+        removeChannelFromDB(channelTable.getSelectionModel().getSelectedItem().getChannelID().getValue());
+
+        channelTable.getItems().removeAll(
+                channelTable.getSelectionModel().getSelectedItems()
+        );
+    }
+
+
+    public void addNewChannel(MouseEvent mouseEvent) {
+        String soBladeURL = JOptionPane.showInputDialog("Please enter the URL for the SocialBlade page:");
+
+        //System.out.println(soBladeURL);
+
+        Document channelData = null;
+        try {
+            channelData = Jsoup.connect(soBladeURL).userAgent("Chrome/66.0.3359.139").get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Element subName, channelIDEl;
+        try {
+            subName = channelData.select("#YouTubeUserTopInfoBlockTop > div:nth-child(1) > h1").first();
+            channelIDEl = channelData.select("#YouTubeUserTopSocial > div:nth-child(2) > a").first();
+
+            String channelID = channelIDEl.attr("href").split("/channel/")[1];
+
+            TrackedSub r = new TrackedSub(channelID, subName.text(), channelData);
+
+        } catch (NullPointerException i) {
+            //System.out.println("\nSorry, this channel is not tracked by socialblade");
+            i.printStackTrace();
+        }
+    }
+
+    public void removeChannelFromDB(String channelID){
+        String DB_URL = "jdbc:mysql://db4free.net:3306/ytsubanalyzer?autoReconnect=true&useSSL=false";
+        String USER = "jsipprell";
+        String PASSWORD = "CMa9d*UVHrJr!2s7";
+
+        try{
+            Connection conn = DriverManager.getConnection(DB_URL,USER,PASSWORD);
+
+            Statement stmt = conn.createStatement();
+            String deleteRows = "DELETE FROM Tracked_Subs WHERE userID = '" + channelID + "'";
+            int rows = stmt.executeUpdate(deleteRows);
+        }
+        catch(SQLException e){ e.printStackTrace(); }
     }
 }
