@@ -25,7 +25,8 @@ public class trackedSub {
     private final Document channelData;
 
     /**
-     *
+     * recieves the channelID, title, and the jsoup document for youtube subscriptions page
+     * constructor
      * @param channelID the base64 channel ID found in youtube URL
      * @param name title of channel
      * @param cData document containing the channel's socialblade page
@@ -157,5 +158,5 @@ public class trackedSub {
                 subCount + ", " +
                 viewCount + ", " +
                 minInc + ", " + maxInc + ")");
-    }
+    }// end makeTableRow
 }

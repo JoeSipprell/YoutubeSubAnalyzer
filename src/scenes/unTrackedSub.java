@@ -9,6 +9,7 @@ import java.io.IOException;
 
 /**
  * unfinished, selecting certain elements on youtube pages is stupidly difficult
+ * and I don't have time to figure out YouTube's api
  */
 public class unTrackedSub {
 

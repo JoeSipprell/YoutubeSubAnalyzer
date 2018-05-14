@@ -101,17 +101,20 @@ public class Controller {
     }// end buttonClicked
 
     /**
-     * scrapes annoying youtube page to find urls for subscribed channels
+     * scrapes annoyingly complex youtube page to find urls for subscribed channels
      * @param URL the url of the user's youtube channel, which has been checked already
      */
     private void checkChannelInput(String URL, MouseEvent mouseEvent){
         try {
+            //splits channel url to just contain '/channel/<channelID>'
             userID = URL.split("(/channel[/(s?)])")[1];
 
             Document userChannel = Jsoup.connect(URL).userAgent("Chrome/66.0.3359.139").get();
 
+            //skips over the channels in sidebar
             Elements subURLs = userChannel.select("a[href]:not([title])");
 
+            //tells user what is happening
             warningLabel.setText("Loading data from YouTube and SocialBlade...");
             for (Element subURL : subURLs) {
                 addChannel(subURL.attr("href"));
@@ -126,6 +129,7 @@ public class Controller {
         // create tables in database
         saveToDataBase();
 
+        // switching scenes to show subList
         Stage primaryStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
         primaryStage.setScene(subListScene);
     }// end checkChannelInput
@@ -157,6 +161,9 @@ public class Controller {
         }// end checking href text
     }
 
+    /**
+     * saves the list of channels to the database
+     */
     public void saveToDataBase(){
         String DB_URL = "jdbc:mysql://db4free.net:3306/ytsubanalyzer?autoReconnect=true&useSSL=false";
         String USER = "jsipprell";
@@ -170,10 +177,12 @@ public class Controller {
 
             createTables(conn);
 
+            //add tracked subs to db
             for (trackedSub ts: tSubs) {
                 addTrackedSub(conn, ts);
             }
 
+            //add untracked subs to db
             for (unTrackedSub us: uSubs) {
                 addUntrackedSub(conn, us);
             }
@@ -186,7 +195,7 @@ public class Controller {
             e.printStackTrace();
         }
 
-    }
+    }// end saveToDataBase
 
     /**
      * deletes the tables already in the database
