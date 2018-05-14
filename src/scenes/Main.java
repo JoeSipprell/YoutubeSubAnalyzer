@@ -6,8 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
 public class Main extends Application {
 
     @Override
@@ -24,13 +22,14 @@ public class Main extends Application {
 
         //designating controller for login scene
         Controller loginC = (Controller) loginLoader.getController();
-        //providing the login controller with the other scenes
-        loginC.setSubListScene(subListScene);
 
         //designating controller for sub list scene
-        subListController subListC = (subListController) subListLoader.getController();
+        SubListController subListC = (SubListController) subListLoader.getController();
         //providing the subList controller with the other scenes
-        subListC.setLoginScene(loginScene);
+        subListC.setLoginScene(loginScene, loginC);
+
+        //providing the login controller with the other scenes
+        loginC.setSubListScene(subListScene, subListC);
 
         //Showing the first screen for program
         primaryStage.setTitle("YouTube Subscription Statistics");

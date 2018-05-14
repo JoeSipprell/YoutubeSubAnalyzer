@@ -11,7 +11,6 @@ import java.util.ResourceBundle;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
@@ -19,11 +18,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.GridPane;
 
 import org.jsoup.Jsoup;
-import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -44,8 +41,8 @@ import java.sql.*;
  */
 public class Controller {
 
-    ArrayList<trackedSub> tSubs = new ArrayList<>();
-    ArrayList<unTrackedSub> uSubs = new ArrayList<>();
+    ArrayList<TrackedSub> tSubs = new ArrayList<>();
+    ArrayList<UntrackedSub> uSubs = new ArrayList<>();
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -75,11 +72,15 @@ public class Controller {
 
     private Scene subListScene;
 
+    private SubListController subListCont;
+
     /**
      * @param scene JavaFX scene for the list of channels scraped
+     * @param subCont controller for the sublist scene
      */
-    public void setSubListScene(Scene scene) {
+    public void setSubListScene(Scene scene, SubListController subCont) {
         subListScene = scene;
+        subListCont = subCont;
     }// end setSubListScene
 
     /**
@@ -129,6 +130,8 @@ public class Controller {
         // create tables in database
         saveToDataBase();
 
+        subListCont.addTableRows();
+
         // switching scenes to show subList
         Stage primaryStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
         primaryStage.setScene(subListScene);
@@ -150,12 +153,12 @@ public class Controller {
             try {
                 subName = channelData.select("#YouTubeUserTopInfoBlockTop > div:nth-child(1) > h1").first();
 
-                tSubs.add(new trackedSub(channelID, subName.text(), channelData));
+                tSubs.add(new TrackedSub(channelID, subName.text(), channelData));
 
             } catch (NullPointerException i) {
                 System.out.println("\nSorry, this channel is not tracked by socialblade");
 
-                uSubs.add(new unTrackedSub(channelID));
+                uSubs.add(new UntrackedSub(channelID));
             }// end try catch block
 
         }// end checking href text
@@ -178,12 +181,12 @@ public class Controller {
             createTables(conn);
 
             //add tracked subs to db
-            for (trackedSub ts: tSubs) {
+            for (TrackedSub ts: tSubs) {
                 addTrackedSub(conn, ts);
             }
 
             //add untracked subs to db
-            for (unTrackedSub us: uSubs) {
+            for (UntrackedSub us: uSubs) {
                 addUntrackedSub(conn, us);
             }
 
@@ -223,7 +226,7 @@ public class Controller {
                 " (Name VARCHAR(60), " +
                 " userID CHAR(24), " +
                 " Country CHAR(2), " +
-                " Genre VARCHAR(15), " +
+                " Genre VARCHAR(50), " +
                 " DateCreated Date, " +
                 " SubCount INT, " +
                 " ViewCount DECIMAL(19,0), " +
@@ -241,10 +244,10 @@ public class Controller {
     /**
      * fills out a row in the table of trackedSubs
      * @param conn connection to db
-     * @param ts the trackedSub currently being added
+     * @param ts the TrackedSub currently being added
      * @throws SQLException
      */
-    public static void addTrackedSub(Connection conn, trackedSub ts) throws SQLException
+    public static void addTrackedSub(Connection conn, TrackedSub ts) throws SQLException
     {
         Statement addRow = conn.createStatement();
 
@@ -259,14 +262,23 @@ public class Controller {
      * @param us untracked sub
      * @throws SQLException
      */
-    public static void addUntrackedSub(Connection conn, unTrackedSub us) throws SQLException
+    public static void addUntrackedSub(Connection conn, UntrackedSub us) throws SQLException
     {
         Statement addRow = conn.createStatement();
 
-        String row = "INSERT INTO UNTRACKED_SUBS VALUES " + us.getChannelID();
+        String row = "INSERT INTO UNTRACKED_SUBS VALUES ('" + us.getChannelID() + "')";
 
         addRow.executeUpdate(row);
     }//end addUntrackedSub
+
+    /**
+     * resets to aloow entry of a different URL
+     */
+    public void reset(){
+        tSubs.clear();
+        uSubs.clear();
+        warningLabel.setText("Please ensure that you have made your subscriptions public");
+    }
 
 
     @FXML
