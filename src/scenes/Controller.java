@@ -84,14 +84,19 @@ public class Controller {
      * @param mouseEvent when the go button is clicked
      */
     public void buttonClicked(MouseEvent mouseEvent) {
-        //String URL = channelInputBox.getText();
-        String URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
-        //String URL = "https://www.youtube.com/channel/UCmDyVjHsavnb35lFW4Vms8w/channels?view=56&shelf_id=0";
+        String URL = channelInputBox.getText();
 
-        //URL = URL.substring(0 , URL.lastIndexOf('/') + 1 ) + "channels?view=56&shelf_id=0";
+        if(channelInputBox.getText().isEmpty()){
+            URL = "https://www.youtube.com/channel/UCmDyVjHsavnb35lFW4Vms8w/channels?view=56&shelf_id=0";
+        }
+        else{
+            URL = URL.substring(0 , URL.lastIndexOf('/') + 1 ) + "channels?view=56&shelf_id=0";
+        }
+        //String URL = "https://www.youtube.com/channel/UCmDyVjHsavnb35lFW4Vms8w/channels?view=56&shelf_id=0";
+        //URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
 
         if (URL.split("(/channel[/(s?)])").length == 3) {
-            loadLabel.setVisible(true);
+            System.out.println("Loading...");
             checkChannelInput(URL, mouseEvent);
         } else {
             warningLabel.setText("Sorry, your input was not valid, please try again.");
@@ -154,7 +159,7 @@ public class Controller {
                 tSubs.add(new TrackedSub(channelID, subName.text(), channelData));
 
             } catch (NullPointerException i) {
-                System.out.println("\nSorry, this channel is not tracked by socialblade");
+                //System.out.println("\nSorry, this channel is not tracked by socialblade");
 
                 uSubs.add(new UntrackedSub(channelID));
             }// end try catch block

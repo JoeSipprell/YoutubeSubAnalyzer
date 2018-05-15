@@ -225,7 +225,7 @@ public class SubListController {
         Element subName, channelIDEl;
         try {
             subName = channelData.select("#YouTubeUserTopInfoBlockTop > div:nth-child(1) > h1").first();
-            channelIDEl = channelData.select("#YouTubeUserTopSocial > div:nth-child(2) > a").first();
+            channelIDEl = channelData.select("#YouTubeUserTopSocial > div > a.core-button.-margin.core-small-wide.ui-black").first();
 
             String channelID = channelIDEl.attr("href").split("/channel/")[1];
 
