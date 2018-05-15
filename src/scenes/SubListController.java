@@ -97,13 +97,14 @@ public class SubListController {
     @FXML
     private Button remove_channel_button;
 
+    ObservableList<TrackedSub> tSubs = FXCollections.observableArrayList();
+    ObservableList<String> uSubs = FXCollections.observableArrayList();
 
     /**
      * fills out the rows for the 2 tables on this page
      */
     public void addTableRows(){
-        ObservableList<TrackedSub> tSubs = FXCollections.observableArrayList();
-        ObservableList<String> uSubs = FXCollections.observableArrayList();
+
 
         String DB_URL = "jdbc:mysql://db4free.net:3306/ytsubanalyzer?autoReconnect=true&useSSL=false";
         String USER = "jsipprell";
@@ -194,19 +195,24 @@ public class SubListController {
 
     }
 
+    /**
+     * removes a channel from the table and deletes it from the database
+     * @param mouseEvent
+     */
     public void removeChannelDialogue(MouseEvent mouseEvent) {
         removeChannelFromDB(channelTable.getSelectionModel().getSelectedItem().getChannelID().getValue());
 
         channelTable.getItems().removeAll(
                 channelTable.getSelectionModel().getSelectedItems()
         );
-    }
+    }//end removeChannelDialogue
 
-
+    /**
+     * for adding a new channel to the list
+     * @param mouseEvent mouse clicked on new channel button
+     */
     public void addNewChannel(MouseEvent mouseEvent) {
         String soBladeURL = JOptionPane.showInputDialog("Please enter the URL for the SocialBlade page:");
-
-        //System.out.println(soBladeURL);
 
         Document channelData = null;
         try {
@@ -224,12 +230,37 @@ public class SubListController {
 
             TrackedSub r = new TrackedSub(channelID, subName.text(), channelData);
 
+            tSubs.add(r);
+
+            addChannelToDB(r);
         } catch (NullPointerException i) {
             //System.out.println("\nSorry, this channel is not tracked by socialblade");
             i.printStackTrace();
         }
-    }
+    }// end addNewChannel
 
+    /**
+     * adds the channel to the database
+     * @param sub
+     */
+    public void addChannelToDB(TrackedSub sub){
+        String DB_URL = "jdbc:mysql://db4free.net:3306/ytsubanalyzer?autoReconnect=true&useSSL=false";
+        String USER = "jsipprell";
+        String PASSWORD = "CMa9d*UVHrJr!2s7";
+        try{
+            Connection conn = DriverManager.getConnection(DB_URL,USER,PASSWORD);
+
+            Statement addRow = conn.createStatement();
+            String row = "INSERT INTO Tracked_Subs VALUES " + sub.getTableRow();
+            addRow.executeUpdate(row);
+        }
+        catch(SQLException e){ e.printStackTrace(); }
+    }// end addChannelToDB
+
+    /**
+     * removes a channel from the database
+     * @param channelID
+     */
     public void removeChannelFromDB(String channelID){
         String DB_URL = "jdbc:mysql://db4free.net:3306/ytsubanalyzer?autoReconnect=true&useSSL=false";
         String USER = "jsipprell";
