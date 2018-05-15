@@ -23,6 +23,7 @@
             <Label fx:id="warningLabel" alignment="TOP_CENTER" layoutX="73.0" layoutY="78.0" text="Please ensure that you have made your subscriptions public" textAlignment="CENTER" />
             <TextField fx:id="channelInputBox" layoutX="123.0" layoutY="140.0" prefHeight="31.0" prefWidth="297.0" promptText="Copy/Paste your channel URL here" />
             <Button fx:id="startButton" defaultButton="true" layoutX="252.0" layoutY="196.0" mnemonicParsing="false" onMouseClicked="#buttonClicked" text="Go" />
+            <Label fx:id="loadLabel" layoutX="243.0" layoutY="105.0" text="Loading..." textAlignment="CENTER" visible="false" />
          </children>
       </AnchorPane>
    </children>

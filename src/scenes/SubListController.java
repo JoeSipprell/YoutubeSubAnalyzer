@@ -1,13 +1,10 @@
-/**
- * Sample Skeleton for 'subList.fxml' Controller Class
- */
-
 package scenes;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
-import java.util.ArrayList;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ResourceBundle;
 
 import javafx.collections.FXCollections;
@@ -15,7 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseEvent;
@@ -89,7 +85,7 @@ public class SubListController {
     private Label overall_stats_label;
 
     @FXML
-    private ListView<?> channel_stat_list;
+    private ListView<String> channel_stat_list;
 
     @FXML
     private Button add_channel_button;
@@ -97,8 +93,11 @@ public class SubListController {
     @FXML
     private Button remove_channel_button;
 
+
     ObservableList<TrackedSub> tSubs = FXCollections.observableArrayList();
     ObservableList<String> uSubs = FXCollections.observableArrayList();
+
+    ObservableList<String> stats = FXCollections.observableArrayList();
 
     /**
      * fills out the rows for the 2 tables on this page
@@ -156,6 +155,8 @@ public class SubListController {
 
         channelTable.setItems(tSubs);
         naList.setItems(uSubs);
+
+        calcGenStats();
     }
 
     private Scene loginScene;
@@ -191,8 +192,6 @@ public class SubListController {
         assert dateColumn != null : "fx:id=\"dateColumn\" was not injected: check your FXML file 'subList.fxml'.";
         assert genreColumn != null : "fx:id=\"genreColumn\" was not injected: check your FXML file 'subList.fxml'.";
         assert maxColumn != null : "fx:id=\"maxColumn\" was not injected: check your FXML file 'subList.fxml'.";
-
-
     }
 
     /**
@@ -205,6 +204,8 @@ public class SubListController {
         channelTable.getItems().removeAll(
                 channelTable.getSelectionModel().getSelectedItems()
         );
+
+        calcGenStats();
     }//end removeChannelDialogue
 
     /**
@@ -237,6 +238,8 @@ public class SubListController {
             //System.out.println("\nSorry, this channel is not tracked by socialblade");
             i.printStackTrace();
         }
+
+        calcGenStats();
     }// end addNewChannel
 
     /**
@@ -275,4 +278,41 @@ public class SubListController {
         }
         catch(SQLException e){ e.printStackTrace(); }
     }
+
+    /**
+     * calculates general statistics for the listed subscriptions and puts them into a listview
+     * this should be called whenever a channel is added or removed
+     */
+    public void calcGenStats(){
+        Double tMinInc = 0.0,tMaxInc = 0.0,aMinInc = 0.0,aMaxInc = 0.0;
+        long tSubCount = 0, tViews = 0, aSubCount = 0, aViews = 0;
+
+        for (TrackedSub sub: tSubs) {
+            tMinInc += sub.getMinInc().doubleValue();
+            tMaxInc += sub.getMaxInc().doubleValue();
+            tSubCount += sub.getSubCount().getValue();
+            tViews += sub.getViewCount().getValue();
+        }
+
+        aMinInc = tMinInc / tSubs.size();
+        aMaxInc = tMaxInc / tSubs.size();
+        aSubCount = Math.floorDiv(tSubCount, tSubs.size());
+        aViews = Math.floorDiv(tViews, tSubs.size());
+
+        NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
+        DecimalFormat commaFormat = new DecimalFormat("#,###");
+
+        stats.clear();
+
+        stats.add("Minimum Total Monthly Income: " + moneyFormat.format(tMinInc));
+        stats.add("Maximum Total Monthly Income: " + moneyFormat.format(tMaxInc));
+        stats.add("Average Min Income: " + moneyFormat.format(aMinInc));
+        stats.add("Average Max Income: " + moneyFormat.format(aMaxInc));
+        stats.add("Total Subscribers: " + commaFormat.format(tSubCount));
+        stats.add("Total Views: " + commaFormat.format(tViews));
+        stats.add("Average Subscribers: " + commaFormat.format(aSubCount));
+        stats.add("Average Views: " + commaFormat.format(aViews));
+
+        channel_stat_list.setItems(stats);
+    }//end calcGenStats
 }

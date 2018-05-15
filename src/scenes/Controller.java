@@ -1,8 +1,3 @@
-/**
- * Sample Skeleton for 'FinalProjectGUI.fxml' Controller Class
- */
-
-
 package scenes;
 
 import java.net.URL;
@@ -35,7 +30,6 @@ import java.sql.*;
 //import java.awt.Toolkit;
 
 /**
- * @author Ken Sipprell
  * Controller class for the login page
  * Maybe should be renamed
  */
@@ -68,6 +62,9 @@ public class Controller {
     @FXML // fx:id="inputPane"
     private AnchorPane inputPane; // Value injected by FXMLLoader
 
+    @FXML
+    private Label loadLabel;
+
     public String userID;
 
     private Scene subListScene;
@@ -88,12 +85,13 @@ public class Controller {
      */
     public void buttonClicked(MouseEvent mouseEvent) {
         //String URL = channelInputBox.getText();
-        //String URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
-        String URL = "https://www.youtube.com/channel/UCmDyVjHsavnb35lFW4Vms8w/channels?view=56&shelf_id=0";
+        String URL = "https://www.youtube.com/channel/UCb81rLqF7RVbnqmOEO0IGMg/channels?view=56&shelf_id=0";
+        //String URL = "https://www.youtube.com/channel/UCmDyVjHsavnb35lFW4Vms8w/channels?view=56&shelf_id=0";
 
         //URL = URL.substring(0 , URL.lastIndexOf('/') + 1 ) + "channels?view=56&shelf_id=0";
 
         if (URL.split("(/channel[/(s?)])").length == 3) {
+            loadLabel.setVisible(true);
             checkChannelInput(URL, mouseEvent);
         } else {
             warningLabel.setText("Sorry, your input was not valid, please try again.");
@@ -275,6 +273,7 @@ public class Controller {
      * resets to aloow entry of a different URL
      */
     public void reset(){
+        warningLabel.setVisible(false);
         tSubs.clear();
         uSubs.clear();
         warningLabel.setText("Please ensure that you have made your subscriptions public");

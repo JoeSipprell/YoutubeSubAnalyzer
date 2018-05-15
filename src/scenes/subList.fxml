@@ -48,11 +48,11 @@
             <ListView fx:id="naList" layoutX="59.0" layoutY="51.0" prefHeight="185.0" prefWidth="245.0" />
          </children>
       </Pane>
-      <Button fx:id="goBackButton" layoutX="421.0" layoutY="542.0" mnemonicParsing="false" onMouseClicked="#goBackClicked" text="Change URL" />
-      <Button fx:id="remove_channel_button" layoutX="406.0" layoutY="494.0" mnemonicParsing="false" onMouseClicked="#removeChannelDialogue" text="Remove Channel" />
-      <Button fx:id="add_channel_button" layoutX="419.0" layoutY="448.0" mnemonicParsing="false" onMouseClicked="#addNewChannel" text="Add Channel" />
-      <ListView fx:id="channel_stat_list" layoutX="631.0" layoutY="410.0" prefHeight="200.0" prefWidth="362.0" />
-      <Label fx:id="overall_stats_label" layoutX="739.0" layoutY="380.0" text="Overall Statistics">
+      <Button fx:id="goBackButton" layoutX="499.0" layoutY="541.0" mnemonicParsing="false" onMouseClicked="#goBackClicked" text="Change URL" />
+      <Button fx:id="remove_channel_button" layoutX="484.0" layoutY="493.0" mnemonicParsing="false" onMouseClicked="#removeChannelDialogue" text="Remove Channel" />
+      <Button fx:id="add_channel_button" layoutX="497.0" layoutY="447.0" mnemonicParsing="false" onMouseClicked="#addNewChannel" text="Add Channel" />
+      <ListView fx:id="channel_stat_list" layoutX="755.0" layoutY="414.0" prefHeight="191.0" prefWidth="362.0" />
+      <Label fx:id="overall_stats_label" layoutX="864.0" layoutY="375.0" text="Overall Statistics">
          <font>
             <Font size="20.0" />
          </font>
